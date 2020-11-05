@@ -1,0 +1,160 @@
+{
+	"invocation": "my test app",
+	"intents": [
+		{
+			"name": "HelloWorldIntent",
+			"phrases": [
+				"hello",
+				"say hello",
+				"say hello world"
+			]
+		},
+		{
+			"name": "TempIntent",
+			"phrases": [
+				"What's the pool temperature",
+				"What is the pool temperature",
+				"Tell me the temperature",
+				"Tell me the pool temperature",
+				"What is the pool temp",
+				"What's the pool temp"
+			]
+		},
+		{
+			"name": "LightsIntent",
+			"phrases": [
+				"turn pool lights {status}",
+				"pool lights {status}",
+				"lights {status}"
+			],
+			"inputs": [
+				{
+					"name": "status",
+					"type": {
+						"dialogflow": "@sys.any"
+					}
+				}
+			]
+		},
+		{
+			"name": "BarWaterfallIntent",
+			"phrases": [
+				"turn bar waterfall {status}",
+				"bar waterfall {status}",
+				"turn {status} bar waterfall"
+			],
+			"inputs": [
+				{
+					"name": "status",
+					"type": {
+						"dialogflow": "@sys.any"
+					}
+				}
+			]
+		},
+		{
+			"name": "SlideIntent",
+			"phrases": [
+				"turn slide {status}",
+				"slide {status}",
+				"turn {status} slide"
+			],
+			"inputs": [
+				{
+					"name": "status",
+					"type": {
+						"dialogflow": "@sys.any"
+					}
+				}
+			]
+		},
+		{
+			"name": "SpaIntent",
+			"phrases": [
+				"turn spa {status}",
+				"spa {status}",
+				"turn {status} spa"
+			],
+			"inputs": [
+				{
+					"name": "status",
+					"type": {
+						"dialogflow": "@sys.any"
+					}
+				}
+			]
+		},
+		{
+			"name": "SetPoolTempIntent",
+			"phrases": [
+				"set the pool temperature to {status} degrees",
+				"set the pool temp to {status} degrees",
+				"set the pool temp to {status}"
+			],
+			"inputs": [
+				{
+					"name": "status",
+					"type": {
+						"dialogflow": "@sys.any"
+					}
+				}
+			]
+		},
+		{
+			"name": "SetSpaTempIntent",
+			"phrases": [
+				"set the spa temperature to {status} degrees",
+				"set the spa temp to {status} degrees",
+				"set the spa temp to {status}"
+			],
+			"inputs": [
+				{
+					"name": "status",
+					"type": {
+						"dialogflow": "@sys.any"
+					}
+				}
+			]
+		}
+	],
+	"alexa": {
+		"interactionModel": {
+			"languageModel": {
+				"intents": [
+					{
+						"name": "AMAZON.CancelIntent",
+						"samples": []
+					},
+					{
+						"name": "AMAZON.HelpIntent",
+						"samples": []
+					},
+					{
+						"name": "AMAZON.StopIntent",
+						"samples": []
+					}
+				]
+			}
+		}
+	},
+	"dialogflow": {
+		"intents": [
+			{
+				"name": "Default Fallback Intent",
+				"auto": true,
+				"webhookUsed": true,
+				"fallbackIntent": true
+			},
+			{
+				"name": "Default Welcome Intent",
+				"auto": true,
+				"webhookUsed": true,
+				"events": [
+					{
+						"name": "WELCOME"
+					}
+				]
+			}
+		]
+	}
+}
