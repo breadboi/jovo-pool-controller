@@ -115,6 +115,21 @@
 					}
 				}
 			]
+		},
+		{
+			"name": "PoolPumpIntent",
+			"phrases": [
+				"Turn {status} the pool",
+				"Turn the pool {status}"
+			],
+			"inputs": [
+				{
+					"name": "status",
+					"type": {
+						"dialogflow": "@sys.any"
+					}
+				}
+			]
 		}
 	],
 	"alexa": {
