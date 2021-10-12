@@ -1,20 +1,19 @@
 [![Jovo Framework](https://www.jovo.tech/img/github-logo.png)](https://www.jovo.tech)
 
-<p align="center">Sample Voice App for the <a href="https://github.com/jovotech/jovo-framework-nodejs">Jovo Framework</a> ⭐️</p>
+<p align="center">Voice App written for personal pool control using the <a href="https://github.com/jovotech/jovo-framework-nodejs">Jovo Framework</a></p>
 
 <p align="center">
-<a href="https://www.jovo.tech/framework/docs/"><strong>Documentation</strong></a> -
-<a href="https://github.com/jovotech/jovo-cli"><strong>CLI </strong></a> - <a href="https://github.com/jovotech/jovo-templates"><strong>Templates </strong></a> -<a href="https://github.com/jovotech/jovo-framework-nodejs/blob/master/CONTRIBUTING.md"><strong>Contributing</strong></a> - <a href="https://twitter.com/jovotech"><strong>Twitter</strong></a></p>
+<a href="https://www.jovo.tech/framework/docs/"><strong>Documentation</strong></a>
 <br/>
 
 # Pool Voice App for Google Home
 
-[Jovo](https://www.jovo.tech "Jovo's website") is a development framework for cross-platform voice apps. Use this repository as a starting point to create a voice application for Amazon Alexa and Google Assistant.
+This application utilizes the Jovo framework to allow users to communicate with their pentair swimming pools.
 
 
 ## Getting Started
 
-In this guide, you will learn how to create a "Hello World" voice app for both Amazon Alexa and Google Assistant.
+Here's how you can get the environment setup.
 
 ### Install the Jovo CLI
 
