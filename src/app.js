@@ -25,7 +25,9 @@ const EventEmitter = require("events").EventEmitter;
 const emitter = new EventEmitter();
 
 const poolStatus = {
-    temperature: ""
+    temperature: "",
+    isSpaActive: "inactive",
+    spaTimeout: 7200000
 };
 
 const app = new App();
@@ -47,6 +49,19 @@ getPoolStatus();
  */
 setInterval(getPoolStatus, 60000);
 
+// ------------------------------------------------------------------
+// Event Listeners
+// ------------------------------------------------------------------
+
+// Create listener for updating temperature
+emitter.on("tempUpdate", function (e) {
+    poolStatus.temperature = e;
+});
+
+// Create listener for updating the spa status
+emitter.on("spaUpdate", function (e) {
+    poolStatus.isSpaActive = e;
+});
 
 // ------------------------------------------------------------------
 // APP LOGIC
@@ -149,7 +164,7 @@ app.setHandler({
         this.tell(`The current pool temperature is ${poolStatus.temperature}`);
     },
 
-    SetPoolTempIntent() {        
+    SetPoolTempIntent() {
         // Find units on the network
         var finder = new ScreenLogic.FindUnits();
         var input = this.$inputs.any.value;
@@ -167,7 +182,7 @@ app.setHandler({
         finder.search();
     },
 
-    SetSpaTempIntent() {        
+    SetSpaTempIntent() {
         // Find units on the network
         var finder = new ScreenLogic.FindUnits();
         var input = this.$inputs.any.value;
@@ -214,33 +229,54 @@ app.setHandler({
 /**
  * Turns the lights off for the unit connection that's passed.
  */
-function getPoolStatus() {
+ function getPoolStatus() {
     // Find units on the network
     var finder = new ScreenLogic.FindUnits();
 
     // Search for a server and get the pool temp
     finder.on('serverFound', function (server) {
         finder.close();
-        console.log("Getting pool status");
 
         var connectedServer = new ScreenLogic.UnitConnection(server);
-        
-        emitter.on("tempUpdate", function (e) {
-            poolStatus.temperature = e;
-        });       
-    
-        connectedServer.on('loggedIn', function () {
-            this.getPoolStatus();
-        }).on('poolStatus', function (status) {
-            emitter.emit("tempUpdate", status.currentTemp[0]);        
-            connectedServer.close();
-        });
-    
-        connectedServer.connect();
+
+        // If it has been over 2 hrs
+        if (poolStatus.isSpaActive == "done") {
+            spaOff(connectedServer);
+            emitter.emit("spaUpdate", "inactive");
+        } else {
+            connectedServer.on('loggedIn', function () {
+                this.getPoolStatus();
+            }).on('poolStatus', function (status) {
+                // Handle pool Status
+                emitter.emit("tempUpdate", status.currentTemp[0]);
+
+                // Find the circuit state for the spa
+                let spaCircuitState;
+                for (let i = 0; i < status.circuitArray.length; i++) {
+                    if (status.circuitArray[i].id == 500) {
+                        spaCircuitState = status.circuitArray[i].state;
+                        break;
+                    }
+                }
+
+                // Handle Spa Status
+                if (spaCircuitState && poolStatus.isSpaActive == "inactive") {
+                    emitter.emit("spaUpdate", "active");
+                    // When the spa is active and we have not setup a timeout
+                    setTimeout(() => {
+                        emitter.emit("spaUpdate", "done");
+                    }, poolStatus.spaTimeout);
+                }
+
+                connectedServer.close();
+            });
+
+            connectedServer.connect();
+        }
     });
 
     // Kicks off the finder on a different thread.
-    finder.search();    
+    finder.search();
 }
 
 /**
@@ -251,7 +287,6 @@ function getPoolStatus() {
  */
 function setTemperature(client, target, temperature) {
     client.on('loggedIn', function () {
-        console.log(`Setting temperature for body ${target} to ${temperature} degrees`);
         client.setSetPoint(0, target, temperature);
         client.setHeatMode(0, target, HEAT);
         client.close();
@@ -266,7 +301,6 @@ function setTemperature(client, target, temperature) {
  */
 function lightsOff(client) {
     client.on('loggedIn', function () {
-        console.log("Turning on the lights");
         this.setCircuitState(0, 502, 0);
         client.close();
     });
@@ -280,7 +314,6 @@ function lightsOff(client) {
  */
 function lightsOn(client) {
     client.on('loggedIn', function () {
-        console.log("Turning on the lights");
         this.setCircuitState(0, 502, 1);
         client.close();
     });
@@ -294,7 +327,6 @@ function lightsOn(client) {
  */
 function waterfallOn(client) {
     client.on('loggedIn', function () {
-        console.log("Turning on the waterfall");
         this.setCircuitState(0, 503, 1);
         client.close();
     });
@@ -308,7 +340,6 @@ function waterfallOn(client) {
  */
 function waterfallOff(client) {
     client.on('loggedIn', function () {
-        console.log("Turning off the waterfall");
         this.setCircuitState(0, 503, 0);
         client.close();
     });
@@ -322,7 +353,6 @@ function waterfallOff(client) {
  */
 function slideOn(client) {
     client.on('loggedIn', function () {
-        console.log("Turning on the slide");
         this.setCircuitState(0, 504, 1);
         client.close();
     });
@@ -336,7 +366,6 @@ function slideOn(client) {
  */
 function slideOff(client) {
     client.on('loggedIn', function () {
-        console.log("Turning off the slide");
         this.setCircuitState(0, 504, 0);
         client.close();
     });
@@ -350,7 +379,6 @@ function slideOff(client) {
  */
 function spaOn(client) {
     client.on('loggedIn', function () {
-        console.log("Turning on the spa");
         this.setCircuitState(0, 500, 1);
         client.close();
     });
@@ -364,7 +392,6 @@ function spaOn(client) {
  */
 function spaOff(client) {
     client.on('loggedIn', function () {
-        console.log("Turning off the spa");
         this.setCircuitState(0, 500, 0);
         client.close();
     });
@@ -378,7 +405,6 @@ function spaOff(client) {
  */
 function poolPumpOn(client) {
     client.on('loggedIn', function () {
-        console.log("Turning on the pool pump");
         this.setCircuitState(0, 505, 1);
         client.close();
     });
@@ -392,7 +418,6 @@ function poolPumpOn(client) {
  */
 function poolPumpOff(client) {
     client.on('loggedIn', function () {
-        console.log("Turning on the pool pump");
         this.setCircuitState(0, 505, 0);
         client.close();
     });
