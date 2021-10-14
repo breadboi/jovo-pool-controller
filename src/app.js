@@ -25,9 +25,10 @@ const EventEmitter = require("events").EventEmitter;
 const emitter = new EventEmitter();
 
 const poolStatus = {
+    pollingTime: 60000, // 60000 = 1 min in ms
     temperature: "",
     isSpaActive: "inactive",
-    spaTimeout: 7200000
+    spaTimeout: 7200000 // 7200000 = 2 hrs in ms
 };
 
 const app = new App();
@@ -47,7 +48,7 @@ getPoolStatus();
 /**
  * Get pool status every minute
  */
-setInterval(getPoolStatus, 60000);
+setInterval(getPoolStatus, poolStatus.pollingTime);
 
 // ------------------------------------------------------------------
 // Event Listeners
