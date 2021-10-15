@@ -27,9 +27,14 @@ const emitter = new EventEmitter();
 const poolStatus = {
     pollingTime: 60000, // 60000 = 1 min in ms
     temperature: "",
-    isSpaActive: "inactive",
+    spaTimerState: "inactive",
     spaTimeout: 7200000 // 7200000 = 2 hrs in ms
 };
+
+// Used to hold the timer that may need to be cleared
+var spaTimeoutTracker = setTimeout(() => {
+    // Do nothing
+}, 0);
 
 const app = new App();
 
@@ -61,7 +66,7 @@ emitter.on("tempUpdate", function (e) {
 
 // Create listener for updating the spa status
 emitter.on("spaUpdate", function (e) {
-    poolStatus.isSpaActive = e;
+    poolStatus.spaTimerState = e;
 });
 
 // ------------------------------------------------------------------
@@ -241,10 +246,10 @@ app.setHandler({
         var connectedServer = new ScreenLogic.UnitConnection(server);
 
         // If it has been over 2 hrs
-        if (poolStatus.isSpaActive == "done") {
+        if (poolStatus.spaTimerState == "done") {
             spaOff(connectedServer);
             emitter.emit("spaUpdate", "inactive");
-        } else {
+        } else {    // For any other spa state
             connectedServer.on('loggedIn', function () {
                 this.getPoolStatus();
             }).on('poolStatus', function (status) {
@@ -261,12 +266,15 @@ app.setHandler({
                 }
 
                 // Handle Spa Status
-                if (spaCircuitState && poolStatus.isSpaActive == "inactive") {
+                if (spaCircuitState && poolStatus.spaTimerState == "inactive") {
                     emitter.emit("spaUpdate", "active");
-                    // When the spa is active and we have not setup a timeout
-                    setTimeout(() => {
+                    // When the spa is active and we need to start a timer
+                    clearTimeout(spaTimeoutTracker);
+                    spaTimeoutTracker = setTimeout(() => {
                         emitter.emit("spaUpdate", "done");
                     }, poolStatus.spaTimeout);
+                } else if (!spaCircuitState && poolStatus.spaTimerState == "active") {  // When the spa is off and a timer is still going, clear the timer
+                    clearTimeout(spaTimeoutTracker);
                 }
 
                 connectedServer.close();
